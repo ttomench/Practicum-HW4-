@@ -110,38 +110,6 @@ graphhist
 ########## Problem 4 ############
 #################################
 
-
-
-prior.prob = list()
-for(i in 1:length(stations)){
-  prior.prob[[i]] = matrix(0, nrow = 4, ncol = length(unique(months)))
-  
-}
-
-for(i in 1:length(stations)){
-  for(j in 1:length(sort(unique(months)))) {
-    station.rows = which(station.ind==i)
-    mon = sort(unique(months))[j]
-    
-    month.labels= which(months==mon)
-    month.rows = which(date.ind%in%month.labels)
-    row.need = intersect(month.rows,station.rows)
-    
-    rain.rows = which(ptype[row.need]=="RA")
-    snow.rows = which(ptype[row.need]=="SN")
-    fzrain.rows = which(ptype[row.need]=="FZRA")
-    ip.rows = which(ptype[row.need]=="IP")
-    
-    prior.prob[[i]][1,j]= length(rain.rows)/length(row.need)
-    prior.prob[[i]][2,j]= length(snow.rows)/length(row.need)
-    prior.prob[[i]][3,j]= length(fzrain.rows)/length(row.need)
-    prior.prob[[i]][4,j]= length(ip.rows)/length(row.need)
-    
-  }
-  
-}
-
-
 plot.prior = list()
 for(i in 1:length(unique(ptype))){
   plot.prior[[i]] = matrix(0, nrow = length(stations), ncol = length(unique(months)))
@@ -215,19 +183,7 @@ for(j in 1:length(unique(months))) {
 #2002           13,202
 test.ind = array()
 
-# mean.train=list()
-# mean.train[[1]] = matrix(0, nrow=16, ncol=12)
-# mean.train[[2]] = matrix(0, nrow=16, ncol=12)
-# mean.train[[3]] = matrix(0, nrow=16, ncol=12)
-# mean.train[[4]] = matrix(0, nrow=16, ncol=12)
-# names(mean.train)= c("rain","snow", "freeze", "ice pellets")
-# 
-# cov.train=list()
-# cov.train[[1]]=list()
-# cov.train[[2]]=list()
-# cov.train[[3]]=list()
-# cov.train[[4]]=list()
-# names(cov.train)= c("rain","snow", "freeze", "ice pellets")
+
 
 
 mean.rain = list()
@@ -325,7 +281,7 @@ for(i in 1:12) {
   #   prob.test[[i]][j,2] = round((snow.pi*phi.snow)/denom, 5)
   #   prob.test[[i]][j,3] = round((frzrain.pi*phi.frzrain)/denom, 5)
   #   prob.test[[i]][j,4] = round(ip.pi*phi.ip)/denom, 5)
-  #   colnames(prob.test[[i]],c("rain", "snow", "freezing", "ice pellets"))
+  #   colnames(prob.test[[i]]) = c("rain", "snow", "freezing", "ice pellets"))
   #   
   #   o.i = c(0,0,0,0)
   #   
@@ -383,16 +339,7 @@ for(i in 1:12) {
 test.nn = sum(test.n, na.rm= T)
 
 
-# mean.rain[[6]]
-# mean.snow[[6]]
-# mean.frzrain[[6]]
-# mean.ip[[6]]
-# 
-# cov.rain[[6]]
-# cov.snow[[6]]
-# cov.frzrain[[6]]
-# cov.ip[[6]]
-# 
+
 pdf(file="HW4_Figures/Mean_ptypes",width = 18, height=5)
 par(mfrow=c(1,4))
 
@@ -427,20 +374,80 @@ legend(270.5,7,c("1996-2000","2008-2013"),lwd=c(3,3),lty=c(3,5), col=c('darkred'
 dev.off()
 
 
-# par(mfrow=c(1,4))
-# image.plot(1:16,1:16,cov.rain[[1]][,16:1],main="Rain",xlab="",ylab="")
-# image.plot(1:16,1:16,cov.snow[[1]][,16:1],main="Snow",xlab="",ylab="")
-# image.plot(1:16,1:16,cov.frzrain[[1]][,16:1],main="Freezing Rain",xlab="",ylab="")
-# image.plot(1:16,1:16,cov.ip[[1]][,16:1],main="Ice Pellets",xlab="",ylab="")
-# 
-
-
-
-
-
 ###########################################
 ################ Problem 6 ################ 
 ###########################################
 
 BS = sum(b.s.new)
 BS
+
+
+############################################
+################ Extra Code ################ 
+############################################
+
+
+
+# mean.train=list()
+# mean.train[[1]] = matrix(0, nrow=16, ncol=12)
+# mean.train[[2]] = matrix(0, nrow=16, ncol=12)
+# mean.train[[3]] = matrix(0, nrow=16, ncol=12)
+# mean.train[[4]] = matrix(0, nrow=16, ncol=12)
+# names(mean.train)= c("rain","snow", "freeze", "ice pellets")
+# 
+# cov.train=list()
+# cov.train[[1]]=list()
+# cov.train[[2]]=list()
+# cov.train[[3]]=list()
+# cov.train[[4]]=list()
+# names(cov.train)= c("rain","snow", "freeze", "ice pellets")
+
+
+# prior.prob = list()
+# for(i in 1:length(stations)){
+#   prior.prob[[i]] = matrix(0, nrow = 4, ncol = length(unique(months)))
+#   
+# }
+# 
+# for(i in 1:length(stations)){
+#   for(j in 1:length(sort(unique(months)))) {
+#     station.rows = which(station.ind==i)
+#     mon = sort(unique(months))[j]
+#     
+#     month.labels= which(months==mon)
+#     month.rows = which(date.ind%in%month.labels)
+#     row.need = intersect(month.rows,station.rows)
+#     
+#     rain.rows = which(ptype[row.need]=="RA")
+#     snow.rows = which(ptype[row.need]=="SN")
+#     fzrain.rows = which(ptype[row.need]=="FZRA")
+#     ip.rows = which(ptype[row.need]=="IP")
+#     
+#     prior.prob[[i]][1,j]= length(rain.rows)/length(row.need)
+#     prior.prob[[i]][2,j]= length(snow.rows)/length(row.need)
+#     prior.prob[[i]][3,j]= length(fzrain.rows)/length(row.need)
+#     prior.prob[[i]][4,j]= length(ip.rows)/length(row.need)
+#     
+#   }
+#   
+# }
+
+
+
+# par(mfrow=c(1,4))
+# image.plot(1:16,1:16,cov.rain[[1]][,16:1],main="Rain",xlab="",ylab="")
+# image.plot(1:16,1:16,cov.snow[[1]][,16:1],main="Snow",xlab="",ylab="")
+# image.plot(1:16,1:16,cov.frzrain[[1]][,16:1],main="Freezing Rain",xlab="",ylab="")
+# image.plot(1:16,1:16,cov.ip[[1]][,16:1],main="Ice Pellets",xlab="",ylab="")
+
+
+# mean.rain[[6]]
+# mean.snow[[6]]
+# mean.frzrain[[6]]
+# mean.ip[[6]]
+# 
+# cov.rain[[6]]
+# cov.snow[[6]]
+# cov.frzrain[[6]]
+# cov.ip[[6]]
+# 
