@@ -411,6 +411,7 @@ observed = rbind(obs.rain,obs.snow,obs.frzrain,obs.ip)
 correct.class = length(observed)/length(prob.hats[,5])
 correct.class
 
+##this is new 
 
 ############################################
 ################ Extra Code ################ 
