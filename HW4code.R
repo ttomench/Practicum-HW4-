@@ -17,8 +17,8 @@
 #################################
 ########## Problem 1 ############
 #################################
-setwd("Z:/Practicum")
-#setwd("~/Documents/Practicum")
+#setwd("Z:/Practicum")
+setwd("~/Documents/Practicum")
 load("predictors.Rdata")
 library(fields)
 library(maps)
