@@ -23,13 +23,13 @@ load("predictors.Rdata")
 library(fields)
 library(maps)
 library(mvtnorm)
+library(base)
 
 long = lon-360
 
 years = as.numeric(substring(dates,1,4))
 months = as.numeric(substring(dates,5,6))
-#years = floor(dates/1000000)
-#years = dates%/%1000000
+
 
 #graphhist <- function(){
 for(i in 1:16) {
@@ -196,14 +196,15 @@ cov.snow = list()
 cov.frzrain = list()
 cov.ip = list()
 
-prob.test = list()
+#prob.test = list()
 
-b.s = list()
-b.s.new= array()
+#b.s = list()
+#b.s.new= array()
 
-test.n = array()
+#test.n = array()
 
-prob.hats = data.frame(matrix(o,nrow = sum(test.nn),ncol = 5))
+prob.hats = data.frame(matrix(0,nrow = sum(test.nn),ncol = 5))
+ind = 0
 
 for(i in 1:12) {
   print(i)
@@ -240,75 +241,83 @@ for(i in 1:12) {
   #print(dim(frzrain.train))
   #print(dim(ip.train))
   
-  # mean.rain[[i]] <- apply(rain.train,2,mean)
-  # mean.snow[[i]] <- apply(snow.train,2,mean)
-  # mean.frzrain[[i]] <- apply(frzrain.train,2,mean)
-  # mean.ip[[i]] <- apply(ip.train,2,mean)
-  # 
-  # cov.rain[[i]] <- cov(rain.train)
-  # cov.snow[[i]] <- cov(snow.train)
-  # cov.frzrain[[i]] <- cov(frzrain.train)
-  # cov.ip[[i]] <- cov(ip.train)
+  mean.rain[[i]] <- apply(rain.train,2,mean)
+  mean.snow[[i]] <- apply(snow.train,2,mean)
+  mean.frzrain[[i]] <- apply(frzrain.train,2,mean)
+  mean.ip[[i]] <- apply(ip.train,2,mean)
+  
+  cov.rain[[i]] <- cov(rain.train)
+  cov.snow[[i]] <- cov(snow.train)
+  cov.frzrain[[i]] <- cov(frzrain.train)
+  cov.ip[[i]] <- cov(ip.train)
   
   #image.plot(1:16,1:16,t(X[,16:1]))
   #print(paste("Training set:",length(training.set)/16))
   #print(paste("Testing set:",length(testing.set)/16))
-  test.n[i]=length(testing.set)/16
+  #test.n[i]=length(testing.set)/16
   
-  # ##### Finding the Probability that a x_i is in a population  #####
-  # prob.test[[i]] = matrix(0, length(testing.set),4)
-  # b.s[[i]] = array()
-  # #b.s[i] = 0
-  # for(j in 1:length(testing.set[,1])) {
-  #   
-  #   mons = months[date.rows[j]]
-  #   mon = which(sort(unique(months))==mons)
-  #   sta = station.rows[j] 
-  #   
-  #   rain.pi = plot.prior[[1]][sta,mon]
-  #   snow.pi = plot.prior[[2]][sta,mon]
-  #   frzrain.pi = plot.prior[[3]][sta,mon]
-  #   ip.pi = plot.prior[[4]][sta,mon]
-  #   
-  #   phi.rain = dmvnorm(testing.set[j,],mean.rain[[i]], cov.rain[[i]])
-  #   phi.snow = dmvnorm(testing.set[j,],mean.snow[[i]], cov.snow[[i]])
-  #   phi.frzrain = dmvnorm(testing.set[j,],mean.frzrain[[i]], cov.frzrain[[i]])
-  #   phi.ip = dmvnorm(testing.set[j,],mean.ip[[i]], cov.ip[[i]])
-  #   
-  #   denom = rain.pi*phi.rain + snow.pi*phi.snow + frzrain.pi*phi.frzrain + ip.pi*phi.ip
-  #   
-  #   prob.test[[i]][j,1] = round((rain.pi*phi.rain)/denom,5)
-  #   prob.test[[i]][j,2] = round((snow.pi*phi.snow)/denom, 5)
-  #   prob.test[[i]][j,3] = round((frzrain.pi*phi.frzrain)/denom, 5)
-  #   prob.test[[i]][j,4] = round(ip.pi*phi.ip)/denom, 5)
-  #   colnames(prob.test[[i]]) = c("rain", "snow", "freezing", "ice pellets"))
-  #   
-  #   o.i = c(0,0,0,0)
-  #   
-  #   if(ptype.test[j]=="RA"){
-  #     o.i[1]= 1
-  #   }
-  #   if(ptype.test[j]=="SN"){
-  #     o.i[2]= 1
-  #   }
-  #   if(ptype.test[j]=="FZRA"){
-  #     o.i[3]= 1
-  #   }
-  #   if(ptype.test[j]=="IP"){
-  #     o.i[4]= 1
-  #   }
-  #   
-  #   b.s[[i]][j]<-sum((prob.test[[i]][j,]-o.i)^2, na.rm = TRUE)
-  #   #b.s[i] <- b.s[i] + sum((prob.test[[i]][j,]-o.i)^2)
-  #   # if(is.nan(b.s[i])==TRUE){
-  #   #   print(j)
-  #   #   break
-  #   # }
-  #   
-  #   
-  # }
-  # 
-  # b.s.new[i] <- sum(b.s[[i]], na.rm = TRUE)
+  ##### Finding the Probability that a x_i is in a population  #####
+  #prob.test[[i]] = matrix(0, length(testing.set),4)
+  #b.s[[i]] = array()
+  #b.s[i] = 0
+  
+  for(j in 1:length(testing.set[,1])) {
+    ind = ind + 1
+    mons = months[date.rows[j]]
+    mon = which(sort(unique(months))==mons)
+    sta = station.rows[j] 
+    
+    rain.pi = plot.prior[[1]][sta,mon]
+    snow.pi = plot.prior[[2]][sta,mon]
+    frzrain.pi = plot.prior[[3]][sta,mon]
+    ip.pi = plot.prior[[4]][sta,mon]
+    
+    phi.rain = dmvnorm(testing.set[j,], mean.rain[[i]], cov.rain[[i]])
+    phi.snow = dmvnorm(testing.set[j,], mean.snow[[i]], cov.snow[[i]])
+    phi.frzrain = dmvnorm(testing.set[j,], mean.frzrain[[i]], cov.frzrain[[i]])
+    phi.ip = dmvnorm(testing.set[j,], mean.ip[[i]], cov.ip[[i]])
+    
+    denom = rain.pi*phi.rain + snow.pi*phi.snow + frzrain.pi*phi.frzrain + ip.pi*phi.ip
+    
+    prob.hats[ind,1] = round((rain.pi*phi.rain)/denom,5)
+    prob.hats[ind,2] = round((snow.pi*phi.snow)/denom, 5)
+    prob.hats[ind,3] = round((frzrain.pi*phi.frzrain)/denom, 5)
+    prob.hats[ind,4] = round((ip.pi*phi.ip)/denom, 5)
+    prob.hats[ind,5] = ptype.test[j]
+    colnames(prob.hats) = c("rain", "snow", "freeze", "ip", "obs")
+    
+#     prob.test[[i]][j,1] = round((rain.pi*phi.rain)/denom,5)
+#     prob.test[[i]][j,2] = round((snow.pi*phi.snow)/denom, 5)
+#     prob.test[[i]][j,3] = round((frzrain.pi*phi.frzrain)/denom, 5)
+#     prob.test[[i]][j,4] = round((ip.pi*phi.ip)/denom, 5)
+#     colnames(prob.test[[i]]) = c("rain", "snow", "freezing", "ice pellets")
+#     
+#     o.i = c(0,0,0,0)
+#     
+#     if(ptype.test[j]=="RA"){
+#       o.i[1]= 1
+#     }
+#     if(ptype.test[j]=="SN"){
+#       o.i[2]= 1
+#     }
+#     if(ptype.test[j]=="FZRA"){
+#       o.i[3]= 1
+#     }
+#     if(ptype.test[j]=="IP"){
+#       o.i[4]= 1
+#     }
+#     
+#     b.s[[i]][j]<-sum((prob.test[[i]][j,]-o.i)^2, na.rm = TRUE)
+    #b.s[i] <- b.s[i] + sum((prob.test[[i]][j,]-o.i)^2)
+    # if(is.nan(b.s[i])==TRUE){
+    #   print(j)
+    #   break
+    # }
+    
+    
+  }
+  
+  #b.s.new[i] <- sum(b.s[[i]], na.rm = TRUE)
   
   
   #   pdf(file=paste("HW4_Figures/covariance_training_",i,".pdf",sep=""),width = 18, height=5)
@@ -379,14 +388,36 @@ dev.off()
 ###########################################
 
 BS = sum(b.s.new)
-BS
+BS/test.nn
+
+if(prob.hats[,5]=='RA'){prob.hats[,5]=1}
+if(prob.hats[,5]=='SN'){prob.hats[,5]=2}
+if(prob.hats[,5]=='FZRA'){prob.hats[,5]=3}
+if(prob.hats[,5]=='IP'){prob.hats[,5]=4}
+
+# obs.rain = which(prob.hats[,5]=='RA')
+# obs.snow = which(prob.hats[,5]=='SN')
+# obs.frzrain = which(prob.hats[,5]=='FZRA')
+# obs.ip = which(prob.hats[,5]=='IP')
+
+which.ptype = apply(prob.hats[,1:4], 1, which.max)
+
+obs.rain = which(which(which.ptype==1)==which(prob.hat[,5]=='RA'))
+obs.snow = which(which(which.ptype==2)==which(prob.hat[,5]=='SN'))
+obs.frzrain = which(which(which.ptype==3)==which(prob.hat[,5]=='FZRA'))
+obs.ip = which(which(which.ptype==4)==which(prob.hat[,5]=='IP'))
+observed = rbind(obs.rain,obs.snow,obs.frzrain,obs.ip)
+
+correct.class = length(observed)/length(prob.hats[,5])
+correct.class
 
 
 ############################################
 ################ Extra Code ################ 
 ############################################
 
-
+#years = floor(dates/1000000)
+#years = dates%/%1000000
 
 # mean.train=list()
 # mean.train[[1]] = matrix(0, nrow=16, ncol=12)
